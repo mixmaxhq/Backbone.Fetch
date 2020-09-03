@@ -29,6 +29,7 @@
   };
 
   var getData = function(response, dataType) {
+    if (response.status === 204) return null;
     return dataType === 'json' ? response.json() : response.text();
   };
 
@@ -49,7 +50,9 @@
 
     return fetch(options.url, options)
       .then(function(response) {
-        var promise = getData(response, options.dataType);
+        var promise = options.type === 'HEAD'
+          ? null
+          : getData(response, options.dataType);
 
         if (response.ok) return promise;
 
