@@ -5,6 +5,9 @@
   "description": "A drop-in Backbone.ajax replacement powered by window.fetch",
   "license": "MIT",
   "main": "./backbone.fetch.js",
+  "files": [
+    "backbone.fetch.js"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/akre54/backbone.fetch"
