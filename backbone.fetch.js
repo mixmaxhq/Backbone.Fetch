@@ -6,73 +6,60 @@
 //     For all details and documentation:
 //     https://github.com/akre54/Backbone.Fetch
 
-(function() {
-  'use strict';
+import defaults from 'lodash/defaults';
+import has from 'lodash/has';
 
-  var defaults = function(obj, source) {
-    for (var prop in source) {
-      if (obj[prop] === undefined) obj[prop] = source[prop];
-    }
-    return obj;
-  };
-
-  var stringifyGETParams = function(url, data) {
-    var query = '';
-    for (var key in data) {
-      if (data[key] == null) continue;
-      query += '&'
-        + encodeURIComponent(key) + '='
-        + encodeURIComponent(data[key]);
-    }
-    if (query) url += (~url.indexOf('?') ? '&' : '?') + query.substring(1);
-    return url;
-  };
-
-  var getData = function(response, dataType) {
-    if (response.status === 204) return null;
-    return dataType === 'json' ? response.json() : response.text();
-  };
-
-  var ajax = function(options) {
-    if (options.type === 'GET' && typeof options.data === 'object') {
-      options.url = stringifyGETParams(options.url, options.data);
-      delete options.data;
-    }
-
-    defaults(options, {
-      method: options.type,
-      headers: defaults(options.headers || {}, {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }),
-      body: options.data
-    });
-
-    return fetch(options.url, options)
-      .then(function(response) {
-        var promise = options.type === 'HEAD'
-          ? null
-          : getData(response, options.dataType);
-
-        if (response.ok) return promise;
-
-        var error = new Error(response.statusText);
-        return promise.then(function(responseData) {
-          error.response = response;
-          error.responseData = responseData;
-          if (options.error) options.error(error);
-          throw error;
-        });
-      })
-      .then(function(responseData) {
-        if (options.success) options.success(responseData);
-        return responseData;
-      });
-  };
-
-  if (typeof exports === 'object') {
-    module.exports = ajax;
-  } else {
-    Backbone.ajax = ajax;
+function stringifyGETParams(url, data) {
+  const parsed = new URL(url);
+  for (const key in data) {
+    if (!has(data, key)) continue;
+    const value = data[key];
+    if (value == null) continue;
+    parsed.searchParams.append(key, value);
   }
-})();
+  return parsed.href;
+}
+
+function getData(response, dataType) {
+  return dataType === 'json' && response.status !== 204 ? response.json() : response.text();
+}
+
+export default function ajax(options) {
+  let url = options.url;
+  if (options.type === 'GET' && options.data !== null && typeof options.data === 'object') {
+    url = stringifyGETParams(url, options.data);
+    delete options.data;
+  } else {
+    // For consistent errors when the url isn't valid.
+    new URL(url);
+  }
+
+  defaults(options, {
+    method: options.type,
+    headers: defaults(options.headers || {}, {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    }),
+    body: options.data,
+  });
+
+  return fetch(url, options)
+    .then((response) => {
+      const promise =
+        options.type === 'HEAD' ? Promise.resolve(null) : getData(response, options.dataType);
+
+      if (response.ok) return promise;
+
+      const error = new Error(response.statusText);
+      return promise.then((responseData) => {
+        error.response = response;
+        error.responseData = responseData;
+        if (options.error) options.error(error);
+        throw error;
+      });
+    })
+    .then((responseData) => {
+      if (options.success) options.success(responseData);
+      return responseData;
+    });
+}
