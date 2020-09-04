@@ -191,6 +191,35 @@ describe('backbone.fetch', () => {
         });
     });
 
+    it('should produce an error for invalid json', async () => {
+      const promise = ajax({
+        dataType: 'json',
+        url: 'http://test',
+        type: 'GET',
+      });
+
+      setTimeout(() => server.respond([200, {}, '']), 1);
+      return promise
+        .then(() => {
+          throw new Error('this request should fail');
+        })
+        .catch((error) => {
+          expect(error).to.be.an.instanceof(SyntaxError);
+          expect(error).not.to.have.property('response');
+        });
+    });
+
+    it('should not parse json for 204 responses', async () => {
+      const promise = ajax({
+        dataType: 'json',
+        url: 'http://test',
+        type: 'GET',
+      });
+
+      setTimeout(() => server.respond([204, {}, '']), 1);
+      return promise;
+    });
+
     it('should parse json as property of Error on failing request', async () => {
       const promise = ajax({
         dataType: 'json',
