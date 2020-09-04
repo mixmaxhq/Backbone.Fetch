@@ -1,6 +1,6 @@
 {
   "name": "@mixmaxhq/backbone.fetch",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "author": "Adam Krebs <amk528@cs.nyu.edu>",
   "description": "A drop-in Backbone.ajax replacement powered by window.fetch",
   "license": "MIT",
