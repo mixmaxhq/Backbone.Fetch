@@ -1,10 +1,10 @@
 {
-  "name": "backbone.fetch",
+  "name": "@mixmaxhq/backbone.fetch",
   "version": "0.2.4",
   "author": "Adam Krebs <amk528@cs.nyu.edu>",
   "description": "A drop-in Backbone.ajax replacement powered by window.fetch",
   "license": "MIT",
-  "main": "backbone.fetch",
+  "main": "./backbone.fetch.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/akre54/backbone.fetch"
