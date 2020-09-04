@@ -229,10 +229,10 @@ describe('backbone.fetch', () => {
 
       setTimeout(() => server.respond([400, {}, JSON.stringify({ code: 'INVALID_HORSE' })]), 1);
       return promise
-        .then(function () {
+        .then(() => {
           throw new Error('this request should fail');
         })
-        .catch(function (error) {
+        .catch((error) => {
           expect(error.responseData).to.deep.equal({ code: 'INVALID_HORSE' });
         });
     });
